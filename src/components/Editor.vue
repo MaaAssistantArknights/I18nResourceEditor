@@ -167,7 +167,7 @@ onBeforeUnmount(() => {
       </NSpace>
       <NSpace>
         <NButton type="primary" @click="handleAddKey">Add key</NButton>
-        <NInput class="search" v-model:value="search" placeholder="Search for keys">
+        <NInput class="search" v-model:value="search" placeholder="Search for keys and translations">
           <template #prefix>
             <NIcon :component="Search" />
           </template>

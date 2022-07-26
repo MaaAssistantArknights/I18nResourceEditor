@@ -26,7 +26,7 @@ const columns: DataTableColumns<DataType> = [
       if (f.length === 0) {
         return true
       }
-      return row.key.includes(f)
+      return [row.key, row.zhCN, row.enUS, row.jaJP, row.koKR].join(' ').includes(f)
     },
     render: (row) => {
       return h(NInput, {
