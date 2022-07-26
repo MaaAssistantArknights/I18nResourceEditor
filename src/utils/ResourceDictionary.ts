@@ -1,6 +1,6 @@
-import { XMLParser, XMLBuilder } from 'fast-xml-parser'
-import { fs } from '@tauri-apps/api'
-import _ from 'lodash'
+import { XMLParser, XMLBuilder } from "fast-xml-parser";
+import { fs } from "@tauri-apps/api";
+import _ from "lodash";
 
 const baseTemplate = {
   ResourceDictionary: {
@@ -8,62 +8,78 @@ const baseTemplate = {
     "@_xmlns:x": "http://schemas.microsoft.com/winfx/2006/xaml",
     "@_xmlns:system": "clr-namespace:System;assembly=mscorlib",
     "@_xmlns:local": "clr-namespaces:MeoAsstGui",
-    "system:String": []
-  }
-}
+    "system:String": [],
+  },
+};
 
 class ResourceDictionary {
   async load(filepath: string): Promise<boolean> {
-    this.filepath_ = filepath
+    this.filepath_ = filepath;
+    try {
+      await fs.readTextFile(filepath);
+    } catch (e) {
+      const builder = new XMLBuilder({
+        ignoreAttributes: false,
+        format: true,
+        indentBy: "  ",
+      });
+      const xml = builder.build(baseTemplate);
+      await fs.writeTextFile(this.filepath_, xml);
+    }
     return new Promise((resolve) => {
       fs.readTextFile(filepath)
-        .then(content => {
-          const parser = new XMLParser({ ignoreAttributes: false })
-          let object = parser.parse(content)
+        .then((content) => {
+          const parser = new XMLParser({ ignoreAttributes: false });
+          let object = parser.parse(content);
           if (Object.keys(object).length === 0) {
-            object = { ...baseTemplate }
+            object = { ...baseTemplate };
           }
-          this.object_ = Object.fromEntries(object.ResourceDictionary["system:String"].map(
-            (item: { "@_x:Key": string, "#text": string }) => [item["@_x:Key"], item["#text"]]
-          ))
-          resolve(true)
+          this.object_ = Object.fromEntries(
+            object.ResourceDictionary["system:String"]?.map(
+              (item: { "@_x:Key": string; "#text": string }) => [
+                item["@_x:Key"],
+                item["#text"],
+              ]
+            ) ?? []
+          );
+          resolve(true);
         })
-        .catch(error => {
-          console.error(error)
-          resolve(false)
-        })
-    })
+        .catch((error) => {
+          console.error(error);
+          resolve(false);
+        });
+    });
   }
 
   get(key: string): string | null {
     if (!this.object_) {
-      return null
+      return null;
     }
-    return _.get(this.object_, key, null)
+    return _.get(this.object_, key, null);
   }
 
   list(): Record<string, string> {
     if (!this.object_) {
-      return {}
+      return {};
     }
-    return this.object_
+    return this.object_;
   }
 
   set(key: string, value: string) {
     if (!this.object_) {
-      return
+      return;
     }
-    _.set(this.object_, key, value)
+    _.set(this.object_, key, value);
   }
 
   async save() {
     if (!this.filepath_ || !this.object_) {
-      return
+      return;
     }
     const builder = new XMLBuilder({
       ignoreAttributes: false,
       format: true,
-      indentBy: '  '
+      indentBy: "  ",
     });
     const xml = builder.build({
       ResourceDictionary: {
@@ -71,19 +87,17 @@ class ResourceDictionary {
         "@_xmlns:x": "http://schemas.microsoft.com/winfx/2006/xaml",
         "@_xmlns:system": "clr-namespace:System;assembly=mscorlib",
         "@_xmlns:local": "clr-namespaces:MeoAsstGui",
-        "system:String": Object.entries(this.object_).map(entry => (
-          {
-            "@_x:Key": entry[0],
-            "#text": entry[1]
-          }
-        ))
-      }
-    })
-    await fs.writeTextFile(this.filepath_, xml)
+        "system:String": Object.entries(this.object_).map((entry) => ({
+          "@_x:Key": entry[0],
+          "#text": entry[1],
+        })),
+      },
+    });
+    await fs.writeTextFile(this.filepath_, xml);
   }
 
-  private object_: Record<string, string> | null = null
-  private filepath_: string | null = null
+  private object_: Record<string, string> | null = null;
+  private filepath_: string | null = null;
 }
 
-export default ResourceDictionary
+export default ResourceDictionary;
