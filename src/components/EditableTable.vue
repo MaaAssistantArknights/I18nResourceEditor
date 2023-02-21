@@ -1,23 +1,58 @@
 <script lang="ts" setup>
 import { h, ref, Ref, onUpdated, nextTick } from 'vue'
 import { NDataTable, NInput, NDropdown, NSpace, DataTableColumns, DropdownOption, DataTableInst } from 'naive-ui'
+import { TableColumn } from 'naive-ui/es/data-table/src/interface';
 
 const props = defineProps<{
-  data: Array<DataType>
+  data: Array<ResourceType>
   filter: string | null
 }>()
 
 const emit = defineEmits(['update:data'])
 
-type DataType = {
-  key: string,
-  zhCN: string,
-  enUS: string,
-  jaJP: string,
-  koKR: string
+const flagUrlMap = {
+  zhCN: 'https://twemoji.maxcdn.com/v/14.0.2/72x72/1f1e8-1f1f3.png',
+  enUS: 'https://twemoji.maxcdn.com/v/14.0.2/72x72/1f1fa-1f1f8.png',
+  jaJP: 'https://twemoji.maxcdn.com/v/14.0.2/72x72/1f1ef-1f1f5.png',
+  koKR: 'https://twemoji.maxcdn.com/v/14.0.2/72x72/1f1f0-1f1f7.png',
 }
 
-const columns: DataTableColumns<DataType> = [
+const localeDisplayMap = {
+  zhCN: 'zh-CN',
+  enUS: 'en-US',
+  jaJP: 'ja-JP',
+  koKR: 'ko-KR',
+}
+
+function buildColumn(locale: AvailableLocalization): TableColumn<ResourceType> {
+  return {
+    title: () => h(NSpace, { align: 'center' }, () => [
+      h('img', { draggable: false, class: 'emoji', src: flagUrlMap[locale] }),
+      h('span', localeDisplayMap[locale])
+    ]),
+    key: locale,
+    render: (row) => {
+      return h(NInput, {
+        class: 'translation-cell',
+        type: 'textarea',
+        autosize: { minRows: 1, maxRows: 5 },
+        value: row[locale].text,
+        onUpdateValue(v) {
+          const index = props.data.findIndex(item => item.key === row.key)
+          props.data[index][locale].text = v
+          if (v.includes('\n') || v.includes('&#')) {
+            props.data[index][locale].options = { preserveSpace: true }
+          } else {
+            props.data[index][locale].options = {}
+          }
+          emit('update:data', props.data)
+        }
+      })
+    }
+  }
+}
+
+const columns: DataTableColumns<ResourceType> = [
   {
     title: 'Key',
     key: 'key',
@@ -39,74 +74,7 @@ const columns: DataTableColumns<DataType> = [
       })
     }
   },
-  {
-    title: () => h(NSpace, { align: 'center' }, () => [
-      h('img', { draggable: false, class: 'emoji', src: 'https://twemoji.maxcdn.com/v/14.0.2/72x72/1f1e8-1f1f3.png' }),
-      h('span', 'zh-CN')
-    ]),
-    key: 'zhCN',
-    render: (row) => {
-      return h(NInput, {
-        value: row.zhCN,
-        onUpdateValue(v) {
-          const index = props.data.findIndex(item => item.key === row.key)
-          props.data[index].zhCN = v
-          emit('update:data', props.data)
-        }
-      })
-    }
-  },
-  {
-    title: () => h(NSpace, { align: 'center' }, () => [
-      h('img', { draggable: false, class: 'emoji', src: 'https://twemoji.maxcdn.com/v/14.0.2/72x72/1f1fa-1f1f8.png' }),
-      h('span', 'en-US')
-    ]),
-    key: 'enUS',
-    render: (row) => {
-      return h(NInput, {
-        value: row.enUS,
-        onUpdateValue(v) {
-          const index = props.data.findIndex(item => item.key === row.key)
-          props.data[index].enUS = v
-          emit('update:data', props.data)
-        }
-      })
-    }
-  },
-  {
-    title: () => h(NSpace, { align: 'center' }, () => [
-      h('img', { draggable: false, class: 'emoji', src: 'https://twemoji.maxcdn.com/v/14.0.2/72x72/1f1ef-1f1f5.png' }),
-      h('span', 'ja-JP')
-    ]),
-    key: 'jaJP',
-    render: (row) => {
-      return h(NInput, {
-        value: row.jaJP,
-        onUpdateValue(v) {
-          const index = props.data.findIndex(item => item.key === row.key)
-          props.data[index].jaJP = v
-          emit('update:data', props.data)
-        }
-      })
-    }
-  },
-  {
-    title: () => h(NSpace, { align: 'center' }, () => [
-      h('img', { draggable: false, class: 'emoji', src: 'https://twemoji.maxcdn.com/v/14.0.2/72x72/1f1f0-1f1f7.png' }),
-      h('span', 'ko-KR')
-    ]),
-    key: 'koKR',
-    render: (row) => {
-      return h(NInput, {
-        value: row.koKR,
-        onUpdateValue(v) {
-          const index = props.data.findIndex(item => item.key === row.key)
-          props.data[index].koKR = v
-          emit('update:data', props.data)
-        }
-      })
-    }
-  },
+  ...(['zhCN', 'enUS', 'jaJP', 'koKR'] as AvailableLocalization[]).map(buildColumn)
 ]
 
 const options: DropdownOption[] = [
@@ -194,5 +162,9 @@ img.emoji {
   width: 2em;
   margin: 0 .05em 0 .1em;
   vertical-align: -0.1em;
+}
+
+.translation-cell {
+  min-width: 100%;
 }
 </style>

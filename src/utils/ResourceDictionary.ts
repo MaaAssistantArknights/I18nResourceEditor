@@ -29,16 +29,30 @@ class ResourceDictionary {
     return new Promise((resolve) => {
       fs.readTextFile(filepath)
         .then((content) => {
-          const parser = new XMLParser({ ignoreAttributes: false });
+          const parser = new XMLParser({
+            ignoreAttributes: false,
+            tagValueProcessor: (_, value) =>
+              value.replaceAll("&#x0a;", "\n"),
+          });
           let object = parser.parse(content);
           if (Object.keys(object).length === 0) {
             object = { ...baseTemplate };
           }
           this.object_ = Object.fromEntries(
             object.ResourceDictionary["system:String"]?.map(
-              (item: { "@_x:Key": string; "#text": string }) => [
+              (item: {
+                "@_x:Key": string;
+                "#text": string;
+                "@_xml:space": "preserve" | undefined;
+              }) => [
                 item["@_x:Key"],
-                item["#text"],
+                Object.assign(
+                  { text: item["#text"] },
+                  item["@_xml:space"] === "preserve" ||
+                    item["#text"]?.includes("\n")
+                    ? { options: { preserveSpace: true } }
+                    : {}
+                ),
               ]
             ) ?? []
           );
@@ -51,21 +65,21 @@ class ResourceDictionary {
     });
   }
 
-  get(key: string): string | null {
+  get(key: string): string | undefined {
     if (!this.object_) {
-      return null;
+      return undefined;
     }
-    return _.get(this.object_, key, null);
+    return _.get(this.object_, key, undefined)?.text;
   }
 
-  list(): Record<string, string> {
+  list(): Record<string, Translation> {
     if (!this.object_) {
       return {};
     }
     return this.object_;
   }
 
-  set(key: string, value: string) {
+  set(key: string, value: Translation) {
     if (!this.object_) {
       return;
     }
@@ -80,23 +94,30 @@ class ResourceDictionary {
       ignoreAttributes: false,
       format: true,
       indentBy: "  ",
+      commentPropName: '#comment',
     });
     const xml = builder.build({
+      "#comment": "THIS FILE IS AUTO GENERATED, DO NOT EDIT",
       ResourceDictionary: {
         "@_xmlns": "http://schemas.microsoft.com/winfx/2006/xaml/presentation",
         "@_xmlns:x": "http://schemas.microsoft.com/winfx/2006/xaml",
         "@_xmlns:system": "clr-namespace:System;assembly=mscorlib",
         "@_xmlns:local": "clr-namespaces:MeoAsstGui",
-        "system:String": Object.entries(this.object_).map((entry) => ({
-          "@_x:Key": entry[0],
-          "#text": entry[1],
-        })),
+        "system:String": Object.entries(this.object_).map((entry) =>
+          Object.assign(
+            {
+              "@_x:Key": entry[0],
+              "#text": entry[1].text,
+            },
+            entry[1].options?.preserveSpace ? { "@_xml:space": "preserve" } : {}
+          )
+        ),
       },
     });
     await fs.writeTextFile(this.filepath_, xml);
   }
 
-  private object_: Record<string, string> | null = null;
+  private object_: Record<string, Translation> | null = null;
   private filepath_: string | null = null;
 }
 

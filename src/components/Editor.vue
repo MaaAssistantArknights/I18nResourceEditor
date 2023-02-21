@@ -35,7 +35,7 @@ const createMessage = (content: string, options: MessageOptions) => {
   )
 }
 
-const mergeData = (locale: AvailableLocalization, record: Record<string, string>) => {
+const mergeData = (locale: AvailableLocalization, record: Record<string, Translation>) => {
   for (const key of Object.keys(record)) {
     const i = data.value.findIndex(item => item.key === key)
     if (i !== -1) {
@@ -43,10 +43,10 @@ const mergeData = (locale: AvailableLocalization, record: Record<string, string>
     } else {
       const newItem = {
         key,
-        zhCN: '',
-        enUS: '',
-        jaJP: '',
-        koKR: ''
+        zhCN: { text: '' },
+        enUS: { text: '' },
+        jaJP: { text: '' },
+        koKR: { text: '' }
       }
       newItem[locale] = record[key]
       data.value.push(newItem)
@@ -125,7 +125,7 @@ const handleSave = async () => {
     const success = await dictionary.load(filepath)
     if (success) {
       for (const entry of entries) {
-        dictionary.set(entry[0], entry[1])
+        dictionary.set(entry[0] as string, entry[1] as Translation)
       }
       await dictionary.save()
     }
@@ -142,10 +142,10 @@ const handleAddKey = async () => {
   }
   data.value.unshift({
     key: '',
-    zhCN: '',
-    enUS: '',
-    jaJP: '',
-    koKR: ''
+    zhCN: { text: '' },
+    enUS: { text: '' },
+    jaJP: { text: '' },
+    koKR: { text: '' }
   })
   if (editableTableRef) {
     editableTableRef.value.handleAdded()

@@ -1,12 +1,12 @@
 [package]
-name = "app"
-version = "0.1.0"
-description = "A Tauri App"
+name = "I18nResourceEditor"
+version = "1.0.2"
+description = "edit i18n resources of MaaWpfUi project"
 authors = ["you"]
-license = ""
-repository = ""
+license = "AGPL-3.0"
+repository = "https://github.com/MaaAssistantArknights/I18nResourceEditor"
 default-run = "app"
-edition = "2021"
+edition = "2023"
 rust-version = "1.57"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
