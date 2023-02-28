@@ -1,4 +1,5 @@
-type AvailableLocalization = 'zhCN' | 'enUS' | 'jaJP' | 'koKR'
+
+type AvailableLocalization = "zhCN" | "zhTW" | "enUS" | "jaJP" | "koKR"
 
 interface Translation {
   text: string;

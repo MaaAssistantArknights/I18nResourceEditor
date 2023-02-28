@@ -44,9 +44,11 @@ const mergeData = (locale: AvailableLocalization, record: Record<string, Transla
       const newItem = {
         key,
         zhCN: { text: '' },
+        zhTW: { text: '' },
         enUS: { text: '' },
         jaJP: { text: '' },
         koKR: { text: '' }
+
       }
       newItem[locale] = record[key]
       data.value.push(newItem)
@@ -69,6 +71,14 @@ const handleOpenDir = async () => {
           const success = await dictionary.load(file.path)
           if (success) {
             mergeData('zhCN', dictionary.list())
+          }
+          break
+        }
+        case 'zh-tw.xaml': {
+          const dictionary = new ResourceDictionary()
+          const success = await dictionary.load(file.path)
+          if (success) {
+            mergeData('zhTW', dictionary.list())
           }
           break
         }
@@ -114,11 +124,12 @@ const handleSave = async () => {
   createMessage('Saving...', { type: 'loading', duration: 0 });
   const localeFilenameMap = {
     zhCN: 'zh-cn',
+    zhTW: 'zh-tw',
     enUS: 'en-us',
     jaJP: 'ja-jp',
     koKR: 'ko-kr'
   }
-  for (const locale of ['zhCN', 'enUS', 'jaJP', 'koKR'] as AvailableLocalization[]) {
+  for (const locale of ['zhCN', 'zhTW', 'enUS', 'jaJP', 'koKR'] as AvailableLocalization[]) {
     const filepath = await join(openedDir.value, `${localeFilenameMap[locale]}.xaml`)
     const entries = data.value.map(item => [item.key, item[locale]])
     const dictionary = new ResourceDictionary()
@@ -143,6 +154,7 @@ const handleAddKey = async () => {
   data.value.unshift({
     key: '',
     zhCN: { text: '' },
+    zhTW: { text: '' },
     enUS: { text: '' },
     jaJP: { text: '' },
     koKR: { text: '' }

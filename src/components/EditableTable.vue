@@ -12,6 +12,7 @@ const emit = defineEmits(['update:data'])
 
 const flagUrlMap = {
   zhCN: 'https://twemoji.maxcdn.com/v/14.0.2/72x72/1f1e8-1f1f3.png',
+  zhTW: 'https://twemoji.maxcdn.com/v/14.0.2/72x72/1f1e8-1f1f3.png',
   enUS: 'https://twemoji.maxcdn.com/v/14.0.2/72x72/1f1fa-1f1f8.png',
   jaJP: 'https://twemoji.maxcdn.com/v/14.0.2/72x72/1f1ef-1f1f5.png',
   koKR: 'https://twemoji.maxcdn.com/v/14.0.2/72x72/1f1f0-1f1f7.png',
@@ -19,6 +20,7 @@ const flagUrlMap = {
 
 const localeDisplayMap = {
   zhCN: 'zh-CN',
+  zhTW: 'zh-TW',
   enUS: 'en-US',
   jaJP: 'ja-JP',
   koKR: 'ko-KR',
@@ -61,7 +63,7 @@ const columns: DataTableColumns<ResourceType> = [
       if (f.length === 0) {
         return true
       }
-      return [row.key, row.zhCN, row.enUS, row.jaJP, row.koKR].join(' ').includes(f)
+      return [row.key, row.zhCN, row.zhTW, row.enUS, row.jaJP, row.koKR].join(' ').includes(f)
     },
     render: (row) => {
       return h(NInput, {
@@ -74,7 +76,7 @@ const columns: DataTableColumns<ResourceType> = [
       })
     }
   },
-  ...(['zhCN', 'enUS', 'jaJP', 'koKR'] as AvailableLocalization[]).map(buildColumn)
+  ...(['zhCN', 'zhTW', 'enUS', 'jaJP', 'koKR'] as AvailableLocalization[]).map(buildColumn)
 ]
 
 const options: DropdownOption[] = [

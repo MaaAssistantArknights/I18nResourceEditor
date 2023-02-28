@@ -7,7 +7,8 @@ const baseTemplate = {
     "@_xmlns": "http://schemas.microsoft.com/winfx/2006/xaml/presentation",
     "@_xmlns:x": "http://schemas.microsoft.com/winfx/2006/xaml",
     "@_xmlns:system": "clr-namespace:System;assembly=mscorlib",
-    "@_xmlns:local": "clr-namespaces:MeoAsstGui",
+    "@_xmlns:local": "clr-namespaces:MaaWpfGui",
+    "@_xmlns:uri": "clr-namespace:System;assembly=System.Runtime",
     "system:String": [],
   },
 };
@@ -93,16 +94,13 @@ class ResourceDictionary {
     const builder = new XMLBuilder({
       ignoreAttributes: false,
       format: true,
-      indentBy: "  ",
+      indentBy: "    ",
       commentPropName: '#comment',
     });
     const xml = builder.build({
       "#comment": "THIS FILE IS AUTO GENERATED, DO NOT EDIT",
       ResourceDictionary: {
-        "@_xmlns": "http://schemas.microsoft.com/winfx/2006/xaml/presentation",
-        "@_xmlns:x": "http://schemas.microsoft.com/winfx/2006/xaml",
-        "@_xmlns:system": "clr-namespace:System;assembly=mscorlib",
-        "@_xmlns:local": "clr-namespaces:MeoAsstGui",
+        ...baseTemplate.ResourceDictionary,
         "system:String": Object.entries(this.object_).map((entry) =>
           Object.assign(
             {
