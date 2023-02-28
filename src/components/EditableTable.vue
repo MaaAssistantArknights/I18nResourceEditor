@@ -67,8 +67,9 @@ const columns: DataTableColumns<ResourceType> = [
     },
     render: (row) => {
       return h(NInput, {
-        value: row.key,
-        onUpdateValue(v) {
+        defaultValue: row.key,
+        passivelyActivated: true,
+        onChange(v) {
           const index = props.data.findIndex(item => item.key === row.key)
           props.data[index].key = v
           emit('update:data', props.data)
